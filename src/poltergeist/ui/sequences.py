@@ -79,15 +79,15 @@ def intro(console: Console, theme: Theme, *, caps, seed: object = None, on_step=
     # 2. static glitch lines
     glitch_rows = ("░▒▓̸▒░alive░▒▓", " ▂▃▅ ghost ░ ▓ ", "~⌁~ syscall ~⌁~")
     for row in glitch_rows:
-        console.print(row, style=theme.whisper)
+        console.print(row, style=theme.whisper, markup=False, highlight=False)
         seq.nap(0.15)
         if any_key_poll(0.01):
             break
-    # 3. ghost art materializes line by line
+    # 3. ghost art materializes line by line (markup off: art contains brackets)
     art = theme.art if caps.unicode else theme.art_ascii
     console.print()
     for line in art:
-        console.print(f"[{theme.ghost}]{line}[/{theme.ghost}]")
+        console.print(f"  {line}", style=theme.ghost, markup=False, highlight=False)
         seq.nap(0.18)
         if any_key_poll(0.01):
             break

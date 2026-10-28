@@ -27,7 +27,7 @@ def test_glitch_adds_marks_at_high_level():
     rng = random.Random(3)
     out = glitch_word("phantomthing", 2, rng, unicode=True)
     assert out != "phantomthing"  # deterministic seed hits some letters
-    assert sum("̸̧́̈̂" .count(c) for c in out) >= 2
+    assert sum("̸̧́̈̂".count(c) for c in out) >= 2
 
 
 def test_url_never_glitched():

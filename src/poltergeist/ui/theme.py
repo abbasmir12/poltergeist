@@ -1,4 +1,9 @@
-"""Haunted palettes + art. Themes: classic (default), ofrenda, slasher."""
+"""Haunted palettes + art. Themes: classic (default), ofrenda, slasher.
+
+Every color here is a *rich* color name and is validated in tests
+(``tests/test_ui.py::test_all_theme_colors_parse_in_rich``) — a bad name once
+crashed a live séance (blanched_almond), hence the guardrail.
+"""
 
 from __future__ import annotations
 
@@ -19,7 +24,7 @@ class Theme:
     sanity_bar: tuple[str, str] = ("medium_purple", "grey37")
     intro_words: tuple[str, ...] = ()
     art: tuple[str, ...] = ()  # materialize lines (unicode)
-    art_ascii: tuple[str, str, ...] = ()  # ASCII fallback art art
+    art_ascii: tuple[str, ...] = ()  # do most systems, degrade path
 
 
 THEMES: dict[str, Theme] = {}
@@ -42,7 +47,7 @@ _t(
     prompt_dir="cornflower_blue",
     panel_border="medium_purple",
     intro_words=(
-        "Lights out. The lamp exchanges its current for something older.",
+        "Lights out. The lamp trades its current for something older.",
         "A static hum. The cursor's blink drifts a half-second off-beat.",
     ),
     art=(
@@ -64,15 +69,15 @@ _t(
     "ofrenda",
     glyph_prompt="🕯️",
     glyph_prompt_ascii="o*",
-    ghost="blanched_almond",
-    whisper="wheat1",
-    ok="banana",
+    ghost="wheat1",
+    whisper="misty_rose1",
+    ok="khaki1",
     fail="orange_red1",
     prompt_dir="dark_orange3",
     panel_border="dark_orange",
-    sanity_bar=("selago_light", "tan_dark"),
+    sanity_bar=("gold1", "grey37"),
     intro_words=(
-        "Marigold petals gather along the scrollbar. Candlelight distorts…",
+        "Marigold petals gather along the scrollbar. Candlelight bends…",
         "A warm breeze. The dead of your shell exhale memories, gently.",
     ),
     art=(
@@ -91,13 +96,13 @@ _t(
     "slasher",
     glyph_prompt="🩸",
     glyph_prompt_ascii="><",
-    ghost="crimson",
+    ghost="red3",
     whisper="grey62",
     ok="spring_green3",
     fail="red",
     prompt_dir="dark_red",
     panel_border="red3",
-    sanity_bar=("salmon_red", "black_noise_dk"),
+    sanity_bar=("misty_rose1", "grey37"),
     intro_words=(
         "The terminal goes still. Somewhere, a synth strings a low note.",
         "You survived last week's sprint. This did not go unnoticed.",

@@ -21,6 +21,25 @@ def test_all_themes_complete():
         assert theme.intro_words
 
 
+def test_all_theme_colors_parse_in_rich():
+    """Regression: a bad color name crashed a live séance once."""
+    from rich.style import Style
+
+    for name in names():
+        theme = THEMES[name]
+        fields = (
+            theme.ghost,
+            theme.whisper,
+            theme.ok,
+            theme.fail,
+            theme.prompt_dir,
+            theme.panel_border,
+            *theme.sanity_bar,
+        )
+        for color in fields:
+            Style.parse(f"italic {color}")  # raises if unknown
+
+
 def test_get_theme_falls_back():
     assert get_theme("nope").name == "classic"
     assert get_theme("OFRENDA").name == "ofrenda"
@@ -45,9 +64,7 @@ def test_non_tty_never_animates():
 
 
 def test_ansi_env_no_color(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        os, "environ", {**os.environ, "NO_COLOR": "1"}
-    )
+    monkeypatch.setattr(os, "environ", {**os.environ, "NO_COLOR": "1"})
     console = Console(file=io.StringIO(), force_terminal=True, color_system="truecolor")
     caps = detect(console)
     assert caps.color_depth == 0
