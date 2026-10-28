@@ -8,11 +8,12 @@
 Poltergeist is a cross-platform (`haunt` / `poltergeist` CLI) haunted terminal
 powered by an open-weight local LLM (Ollama + Gemma) that comments on your
 commands, chats with you, proposes commands (safety-gated), and restores your
-terminal on `exorcise`. **Current phase: 1 — Foundation (in progress).**
+terminal on `exorcise`. **Current phase: 2 — Haunted look (complete); Phase 3 —
+Ghost brain (core paths wired, polish remaining).**
 
 ## Last updated
 
-2026-10-28, by GLM agent (session 1 — repo bootstrap).
+2026-10-28 (session 1, continued), by GLM agent — Phases 1 and 2 committed.
 
 ## Completed tasks
 
@@ -39,10 +40,25 @@ terminal on `exorcise`. **Current phase: 1 — Foundation (in progress).**
       client (httpx), canned offline fallbacks; REPL uses fallback lines when
       Ollama is unavailable (tested off-line).
 - [x] 2026-10-28 — GitHub Actions CI matrix (ubuntu/windows/macos × 3.10–3.13).
-- [x] 2026-10-28 — Phase 1 acceptance: `pytest` green locally (156 tests +
+- [x] 2026-10-28 — Phase 1 acceptance: `pytest` green locally (173 tests +
       3 Windows-skips), `ruff` clean, manual smoke of the full loop
       (`echo`, `cd /`, `git status`, `ghost,` chat, `sanity`, `exorcise`) on
       Linux with Ollama offline (canned voice path).
+- [x] 2026-10-28 — Phase 2: `ui/theme.py` — classic/ofrenda/slasher palettes,
+      glyphs, ASCII-art fallbacks; all colors validated against rich in tests
+      (a bad name — `blanched_almond` — crashed one live séance and was caught
+      by a PTY smoke test; fixed + regression test added).
+- [x] 2026-10-28 — Phase 2: capability detection (`ui/capabilities.py`) —
+      TTY/Unicode/color-depth; NO_COLOR and non-TTY force plain+ASCII,
+      animations off; `POLTERGEIST_NO_ANIM` escape hatch.
+- [x] 2026-10-28 — Phase 2: skippable intro (`ui/sequences.py`) — flicker →
+      glitch static → ghost art materializes → first words; time-budgeted
+      (≤4 s) + any-key skip; `outro` exorcism sequence; terminal always
+      restored (cursor visible, SGR reset).
+- [x] 2026-10-28 — Phase 2: ghost speech via typewriter + zalgo-lite word
+      corruption that scales DOWN as sanity drops (glitch level 2 only below
+      sanity 30); tombstone-style `☠ exit N` framing for failures; themed
+      prompts (👻/🕯️/🩸 or ASCII fallback).
 
 ## In progress
 
@@ -50,20 +66,19 @@ terminal on `exorcise`. **Current phase: 1 — Foundation (in progress).**
 
 ## Next up (prioritized)
 
-1. Phase 2 — Haunted look: `ui/theme.py` (classic/ofrenda/slasher palettes),
-   intro/outro transformation animation (<4 s, skippable), speech-bubble panel
-   with typewriter + glitch effects, spooky prompt (Unicode + ASCII fallback),
-   guaranteed terminal restore.
-2. Phase 2 — Capability detection (color depth / Unicode / width) + graceful
-   degradation incl. `NO_COLOR`, non-TTY.
-3. Phase 3 — Ghost brain: prompt assembly with real command context, streaming
-   commentary with rate limiting, `ghost,` chat, richer fallbacks.
-4. Phase 4 — Safety & agency: `--autonomy curious` auto-run path, glowing
-   approval box, autonomous idle/whisper thread via `patch_stdout`.
-5. Phase 5 — Memory: shell-history readers (bash/zsh/fish/PSReadLine) with
-   opt-in consent + `haunt forget`; sanity meter with meltdown scene.
-6. Phase 6 — Ship: README (zero→haunted in 5 min), demo script + GIF,
-   DEV post outline in `docs/`.
+1. Phase 3 — Ghost brain polish: verify against a live Ollama + `gemma3:1b`
+   (commentary quality, `ghost,` chat with real output context); tune
+   `commentary_rate`; add one-off `haunt "command"` non-interactive demo mode
+   (nice for GIF).
+2. Phase 4 — Safety & agency: `--autonomy curious` auto-run path for `safe`
+   verdicts, glowing approval box for `needs-approval` proposals, autonomous
+   idle/night whisper thread using `prompt_toolkit`'s `patch_stdout`.
+3. Phase 5 — Memory: opt-in shell-history readers (bash/zsh/fish/PSReadLine +
+   Poltergeist audit), "I remember" hauntings, `haunt forget` wiring (exists —
+   extend to history store), sanity meter full meltdowns at 0.
+4. Phase 6 — Ship: README GIF, demo script in `docs/`, DEV post outline,
+   first-run onboarding consent screen, CI green on all 3 OSes.
+5. Stretch (only if solid): voice (`--voice`), PTY possess mode.
 
 ## Known issues / blockers
 
@@ -80,16 +95,20 @@ terminal on `exorcise`. **Current phase: 1 — Foundation (in progress).**
 | 2026-10-28 | httpx for Ollama streaming                                               | Cleaner streaming (SSE/NDJSON) than urllib, still fully local/libre                              |
 | 2026-10-28 | Raw ANSI control codes guarded behind a capability check                  | rich handles most styling; low-level cursor/screen control must degrade                          |
 | 2026-10-28 | Config file is TOML in platformdirs user config dir                       | Human-friendly single file; `tomllib` is stdlib on 3.11+, `tomli` marker dep for 3.10            |
+| 2026-10-28 | Phase 2 regression: every theme color validated against rich in tests        | A bad color name (`blanched_almond`) crashed a live séance; caught by a PTY smoke test           |
+| 2026-10-28 | Non-TTY stdin falls back from prompt_toolkit to `input()`                     | prompt_toolkit can't drive pipes; the plain path keeps demos/tests working                      |
+| 2026-10-28 | Typewriter bounded at 1.4 s per line; corruption only below sanity 60         | The ghost must never hold the user hostage; sanity 100+ stays readable                          |
 
 ## How to run/test right now
 
 ```bash
 python3 -m venv .venv && . .venv/bin/activate
 pip install -e ".[dev]"
-pytest                     # 156 passed + 3 windows-skips as of last update (no Ollama needed)
+pytest                     # 173 passed + 3 windows-skips as of last update (no Ollama needed)
 ruff check src tests
 haunt doctor               # status of Python/TTY/Ollama/model
-haunt                      # haunted REPL (canned ghost lines without Ollama)
+haunt                      # full haunted session (intro animation on a TTY)
+haunt --no-intro           # skip the transformation sequence
 ```
 
 ## Demo & submission checklist
