@@ -7,13 +7,14 @@ from collections.abc import Iterator
 
 import httpx
 
+from ..config import MODEL_FALLBACKS
 from .provider import GhostProvider, Message, ProviderUnavailable, messages_to_dicts
 
 
 class OllamaProvider(GhostProvider):
     name = "ollama"
 
-    ALL_FALLBACK_CHAIN = ("gemma3:1b", "gemma3:270m")
+    ALL_FALLBACK_CHAIN = MODEL_FALLBACKS
 
     def __init__(
         self,

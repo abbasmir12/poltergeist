@@ -13,13 +13,17 @@ Ghost brain (core paths wired, polish remaining).**
 
 ## Last updated
 
-2026-10-28 (session 1, continued), by GLM agent — Phases 1 and 2 committed.
+2026-10-28 (session 2), by GLM agent — default model switched to `gemma4:e4b`.
 
 ## Completed tasks
 
 - [x] 2026-10-28 — Verified Ollama Gemma tags against the live library:
       `gemma3:270m` (292 MB), `gemma3:1b` (806 MB), `gemma3:4b` (3.4 GB),
-      `1b-it-qat`, etc. → default model will be `gemma3:1b` (see Decisions).
+      `1b-it-qat`, etc. → default model was `gemma3:1b` (see Decisions).
+- [x] 2026-10-28 — Default model switched to **`gemma4:e4b`** at the user's
+      request; tag verified against Ollama's live library (effective-4B edge
+      model, 6.6–9.5 GB, 128k ctx). Fallback chain extended:
+      `gemma4:e4b` → `gemma3:1b` → `gemma3:270m` → any installed model.
 - [x] 2026-10-28 — AGENTS.md, STATUS.md, LICENSE (MIT), .gitignore created.
 - [x] 2026-10-28 — pyproject.toml with `haunt`/`poltergeist` entry points.
 - [x] 2026-10-28 — Cross-platform shell abstraction (`shell/base.py`,
@@ -66,7 +70,7 @@ Ghost brain (core paths wired, polish remaining).**
 
 ## Next up (prioritized)
 
-1. Phase 3 — Ghost brain polish: verify against a live Ollama + `gemma3:1b`
+1. Phase 3 — Ghost brain polish: verify against a live Ollama + `gemma4:e4b`
    (commentary quality, `ghost,` chat with real output context); tune
    `commentary_rate`; add one-off `haunt "command"` non-interactive demo mode
    (nice for GIF).
@@ -89,7 +93,8 @@ Ghost brain (core paths wired, polish remaining).**
 
 | Date       | Decision                                                                 | Why                                                                                             |
 | ---------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| 2026-10-28 | Default model **`gemma3:1b`** (806 MB, text-only, 32k ctx)                | Verified against Ollama library today; small enough for laptops; `270m` kept as fallback after it |
+| 2026-10-28 | Default model **`gemma4:e4b`** (effective-4B edge model, 6.6–9.5 GB, 128k ctx) | User request; tag verified against Ollama's library the same day — it is the on-device Edge class. Fallback chain keeps `gemma3:1b` (806 MB) for tiny machines |
+| 2026-10-28 | (superseded) Default was `gemma3:1b` at bootstrap                        | Verified small-then; kept in the fallback chain for lightweight laptops                          |
 | 2026-10-28 | No PTY/ConPTY on core path; `subprocess` + native shells                  | Fragile cross-platform; capture+stream via pipes is reliable and testable                        |
 | 2026-10-28 | `cd`/`export`/`set` intercepted in Python, shell spawned per command       | Shells don't share state between invocations; interception is portable and testable              |
 | 2026-10-28 | httpx for Ollama streaming                                               | Cleaner streaming (SSE/NDJSON) than urllib, still fully local/libre                              |
@@ -114,7 +119,7 @@ haunt --no-intro           # skip the transformation sequence
 ## Demo & submission checklist
 
 - [ ] Demo GIF/video recorded
-- [ ] README done (install incl. Ollama + `gemma3:1b`, why-open-source section)
+- [ ] README done (install incl. Ollama + `gemma4:e4b`, why-open-source section)
 - [ ] Demo script in `docs/`
 - [ ] DEV post drafted (tags `#devchallenge` `#hf26challenge`)
 - [ ] Submitted before **Oct 31 2026, 11:59 PM PDT**

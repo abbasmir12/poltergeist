@@ -94,6 +94,7 @@ def test_checks_with_healthy_olama_and_wanted_model():
         return httpx.Response(200, json={"models": models})
 
     cfg = Config()
+    cfg.model = "gemma3:1b"  # tag present in the mocked /api/tags list
     checks = run_checks(client=httpx.Client(transport=httpx.MockTransport(handler)), cfg=cfg)
     statuses = {c.name: c.status for c in checks}
     assert statuses["Ollama"] == "ok"

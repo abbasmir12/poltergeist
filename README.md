@@ -33,10 +33,12 @@ $ exorcise                            # return your terminal to the living
 ## Quickstart (zero → haunted in 5 minutes)
 
 1. **Install Ollama** — <https://ollama.com/download> (Windows, macOS, Linux).
-2. **Pull the ghost's brain** (small enough for any laptop):
+2. **Pull the ghost's brain** (the default is the *edge* Gemma 4 model — made
+   for on-device local execution; use `gemma3:1b` instead if you want the
+   ultra-light download):
 
    ```console
-   $ ollama pull gemma3:1b
+   $ ollama pull gemma4:e4b
    ```
 
 3. **Install Poltergeist**:
@@ -97,12 +99,13 @@ open-weight models are the only way to make that promise checkable:
    read both.
 3. **Access**: free forever, works on a train in a tunnel, no API key. A
    haunted terminal shouldn't cost a subscription.
-4. **Openness as creativity constraint**: making a small open model (Gemma 1B,
-   806 MB) carry a *persona* strictly with prompts is a fun challenge — and it
-   is why the ghost's personality is all craft and minimal data.
+4. **Openness as creativity constraint**: making a small open model (Gemma 4
+   E4B by default, swappable down to an 806 MB Gemma 3) carry a *persona*
+   strictly with prompts is a fun challenge — and it is why the ghost's
+   personality is all craft and minimal data.
 
-Swapping models is a one-liner: `haunt --model gemma3:270m` or
-`POLTERGEIST_MODEL=qwen2.5:3b haunt`.
+Swapping models is a one-liner: `haunt --model gemma4:e2b` (lighter) or
+`POLTERGEIST_MODEL=qwen2.5:3b haunt` (any Ollama model).
 
 ## Development
 

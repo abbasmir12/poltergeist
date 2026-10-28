@@ -62,17 +62,17 @@ _LINES: dict[str, dict[str, list[str]]] = {
     },
     "chat_offline": {
         "classic": [
-            "(My spectral voice is hoarse — no local model answered.) Run `ollama pull gemma3:1b` "
+            "(My spectral voice is hoarse — no local model answered.) Run `ollama pull gemma4:e4b` "
             "and I will be fully articulate. Until then I mostly mime.",
-            "(The séance modem squeaks in vain.) `ollama pull gemma3:1b` restores my voice; until "
+            "(The séance modem squeaks in vain.) `ollama pull gemma4:e4b` restores my voice; until "
             "then my answers are: spooky, unsatisfying, 'it depends'.",
         ],
         "ofrenda": [
-            "(Mi voz espectral needs a local model to carry it.) Run `ollama pull gemma3:1b`, "
+            "(Mi voz espectral needs a local model to carry it.) Run `ollama pull gemma4:e4b`, "
             "por favor."
         ],
         "slasher": [
-            "(The aspic of my voice needs a model!) `ollama pull gemma3:1b` —"
+            "(The aspic of my voice needs a model!) `ollama pull gemma4:e4b` —"
             " the classic summoning."
         ],
     },

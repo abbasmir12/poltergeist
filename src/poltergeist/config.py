@@ -15,11 +15,12 @@ except ModuleNotFoundError:  # py3.10
     import tomli as _toml_reader  # type: ignore[no-redef]
 
 APP_NAME = "poltergeist"
-DEFAULT_MODEL = "gemma3:1b"
+DEFAULT_MODEL = "gemma4:e4b"
 # Fallback chain — verified against Ollama's library on 2026-10-28:
-# gemma3:1b (806 MB, text) → gemma3:270m (292 MB, text). The real last resort
-# is *any* installed model; see poltergeist.ghost.ollama.
-MODEL_FALLBACKS = ("gemma3:1b", "gemma3:270m")
+# gemma4:e4b (6.6–9.5 GB, effective-4B edge model, 128k ctx)
+# → gemma3:1b (806 MB, text) → gemma3:270m (292 MB, text).
+# The real last resort is *any* installed model; see poltergeist.ghost.ollama.
+MODEL_FALLBACKS = ("gemma4:e4b", "gemma3:1b", "gemma3:270m")
 DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
 
 _THEMES = ("classic", "ofrenda", "slasher")

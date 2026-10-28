@@ -45,17 +45,18 @@ Polished working demo-able core > breadth. When in doubt, make the core loop
 | ------------- | ----------------------------------------------------------- |
 | Language      | Python **3.10+** (test on 3.10–3.13)                         |
 | TUI           | `rich` (output), `prompt_toolkit` (input + `patch_stdout`)   |
-| Model backend | **Ollama** (local HTTP, streaming). Default model `gemma3:1b` |
+| Model backend | **Ollama** (local HTTP, streaming). Default model `gemma4:e4b` |
 | HTTP          | `httpx` (streaming to `http://localhost:11434`)              |
 | Config paths  | `platformdirs` (+ `tomllib`/`tomli` for config files)        |
 | Packaging     | `pyproject.toml` (hatchling), pip/pipx installable           |
 | Entry points  | `haunt`, `poltergeist` (same CLI)                            |
 | CI            | GitHub Actions: ubuntu + windows + macos × Python 3.10–3.13  |
 
-Default model: `gemma3:1b` (verified against Ollama's library: 806 MB,
-text-only, 32k context — runs on a laptop). Configurable via `--model`,
-`POLTERGEIST_MODEL` env var, or config file. Fallback chain: configured →
-`gemma3:1b` → `gemma3:270m` → any installed model → canned fallback lines.
+Default model: `gemma4:e4b` (verified against Ollama's library: effective-4B
+"edge" model, 6.6–9.5 GB, 128k context, made for on-device local execution).
+Configurable via `--model`, `POLTERGEIST_MODEL` env var, or config file.
+Fallback chain: configured → `gemma4:e4b` → `gemma3:1b` → `gemma3:270m` →
+any installed model → canned fallback lines.
 
 ## 3. Architecture overview
 

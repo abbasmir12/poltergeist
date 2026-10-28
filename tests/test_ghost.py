@@ -62,7 +62,7 @@ def test_whisper_never_empty_across_events_and_themes():
 
 def test_chat_offline_line_mentions_model_fix():
     line = pick("chat_offline", "classic", seed=0)
-    assert "gemma3:1b" in line or "ollama" in line.lower()
+    assert "gemma4:e4b" in line or "ollama" in line.lower()
 
 
 def test_react_fail_vs_success_events():

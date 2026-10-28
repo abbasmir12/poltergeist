@@ -37,7 +37,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def _add_session_flags(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
-        "--model", default=None, metavar="NAME", help="Ollama model (default: gemma3:1b)"
+        "--model", default=None, metavar="NAME", help="Ollama model (default: gemma4:e4b)"
     )
     parser.add_argument("--theme", default=None, choices=_THEMES, help="possession style")
     parser.add_argument("--no-intro", action="store_true", help="skip the transformation sequence")

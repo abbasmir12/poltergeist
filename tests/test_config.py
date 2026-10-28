@@ -7,7 +7,7 @@ from poltergeist.config import Config, load_config, save_config
 
 def test_defaults():
     cfg = Config()
-    assert cfg.model == "gemma3:1b"
+    assert cfg.model == "gemma4:e4b"
     assert cfg.autonomy == "ask"
     assert cfg.theme == "classic"
     assert cfg.history_consent is None  # first-run asks
@@ -69,7 +69,7 @@ def test_corrupt_config_is_survivable(tmp_path):
     path = tmp_path / "c.toml"
     path.write_text("not [valid toml = = ==")
     cfg = load_config(path)
-    assert cfg.model == "gemma3:1b"  # all defaults
+    assert cfg.model == "gemma4:e4b"  # all defaults
 
 
 def test_no_color_disables_flicker(tmp_path, monkeypatch):

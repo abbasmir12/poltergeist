@@ -96,7 +96,9 @@ class HauntedRepl:
             self.console.print(
                 rich.panel.Panel(
                     "[italic]No local model answered the summoning — the ghost speaks in its "
-                    "canned voice for now. Install Ollama, then `ollama pull gemma3:1b`, and run "
+                    "canned voice for now. Install Ollama, then `ollama pull "
+                    f"{self.config.model}`, "
+                    "and run "
                     "`haunt doctor` to diagnose. Nothing leaves this machine either way.[/italic]",
                     border_style=self.theme.panel_border,
                     box=rich.box.ROUNDED,
