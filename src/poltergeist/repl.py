@@ -16,7 +16,9 @@ import sys
 import rich.box
 import rich.panel
 from prompt_toolkit import PromptSession
+from prompt_toolkit.formatted_text import ANSI as PTANSI
 from prompt_toolkit.history import InMemoryHistory
+from rich.color import Color
 from rich.console import Console
 
 from .config import Config, save_config
@@ -157,17 +159,38 @@ class HauntedRepl:
         glyph = self.theme.glyph_prompt_ascii
         return f"{glyph} {self._cwd_display()} › "
 
-    def _prompt_text(self) -> str:
+    @staticmethod
+    def _sgr(color: str | None, *, dim: bool = False, italic: bool = False) -> str:
+        """SGR sequence for a rich color name (truecolor ANSI), or '' if none."""
+        codes: list[str] = []
+        if italic:
+            codes.append("3")
+        if dim:
+            codes.append("2")
+        if color:
+            try:
+                rgb = Color.parse(color).get_truecolor()
+                codes += ["38", "2", str(rgb.red), str(rgb.green), str(rgb.blue)]
+            except Exception:  # noqa: BLE001 — an unknown color never breaks the prompt
+                pass
+        return f"\x1b[{';'.join(codes)}m" if codes else ""
+
+    def _prompt_text(self) -> PTANSI:
+        """prompt_toolkit prompt as ANSI formatted text.
+
+        NOTE: prompt_toolkit does NOT parse rich markup — feeding it rich
+        strings printed raw `[italic dim …]` tags on a live Windows séance.
+        It must receive ANSI escape codes instead.
+        """
         cwd = self._cwd_display()
         glyph = (
             self.theme.glyph_prompt
             if self.caps.unicode and self.config.flicker
             else self.theme.glyph_prompt_ascii
         )
-        return (
-            f" {glyph} "
-            f"[italic dim {self.theme.prompt_dir}]{cwd}[/italic dim {self.theme.prompt_dir}] › "
-        )
+        dir_sgr = self._sgr(self.theme.prompt_dir, dim=True, italic=True)
+        sep_sgr = self._sgr(self.theme.whisper, dim=True)
+        return PTANSI(f" {glyph} {dir_sgr}{cwd}\x1b[0m{sep_sgr} › \x1b[0m")
 
     def _cwd_display(self) -> str:
         cwd = self.shell.cwd

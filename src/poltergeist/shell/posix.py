@@ -154,21 +154,24 @@ class PosixShell(Shell):
 
     def _drain_stderr(self, proc, emit: OutputCallback) -> threading.Thread:
         def worker() -> None:
-            assert proc.stderr is not None
-            decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
-            splitter = LineSplitter()
-            while True:
-                try:
-                    chunk = proc.stderr.read1(CHUNK)
-                except OSError:
-                    return
-                if not chunk:
-                    return
-                for line in splitter.feed(decoder.decode(chunk)):
-                    emit(line, "stderr")
-            tail = splitter.eof()
-            if tail:
-                emit(tail, "stderr")
+            try:
+                assert proc.stderr is not None
+                decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
+                splitter = LineSplitter()
+                while True:
+                    try:
+                        chunk = proc.stderr.read1(CHUNK)
+                    except (OSError, AttributeError):
+                        break
+                    if not chunk:
+                        break
+                    for line in splitter.feed(decoder.decode(chunk)):
+                        emit(line, "stderr")
+                tail = splitter.eof()
+                if tail:
+                    emit(tail, "stderr")
+            except Exception:  # noqa: BLE001 — a dead stderr thread must not tear down the séance
+                return
 
         thread = threading.Thread(target=worker, daemon=True)
         thread.start()

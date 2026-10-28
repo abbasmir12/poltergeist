@@ -62,7 +62,7 @@ class WindowsShell(Shell):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             stdin=subprocess.DEVNULL,
-            bufsize=0,
+            bufsize=-1,  # buffered, but BufferedReader.read1 keeps live streaming
             creationflags=creationflags,
         )
 
@@ -79,8 +79,11 @@ class WindowsShell(Shell):
 
     def _drain_stderr(self, proc, emit: OutputCallback) -> threading.Thread:
         def worker() -> None:
-            assert proc.stderr is not None
-            self._stream(proc.stderr, emit, "stderr")
+            try:
+                assert proc.stderr is not None
+                self._stream(proc.stderr, emit, "stderr")
+            except Exception:  # noqa: BLE001 — a dead stderr thread must not tear down the séance
+                return
 
         thread = threading.Thread(target=worker, daemon=True)
         thread.start()
@@ -93,8 +96,8 @@ class WindowsShell(Shell):
         while True:
             try:
                 chunk = pipe.read1(CHUNK)
-            except OSError:
-                break
+            except (OSError, AttributeError):
+                break  # AttributeError: raw FileIO lacks read1 (should not happen post-bufsize fix)
             if not chunk:
                 break
             for line in splitter.feed(decoder.decode(chunk)):
