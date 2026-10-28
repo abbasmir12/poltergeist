@@ -6,7 +6,6 @@ from rich.console import Console
 
 from poltergeist.ui.terminal import (
     PALETTES,
-    TITLES,
     exorcise_terminal,
     is_capable,
     pick_palette,
@@ -39,7 +38,7 @@ def test_palettes_have_valid_hex():
 def test_possess_writes_osc_to_tty(monkeypatch):
     # Force isatty True
     sink = io.StringIO()
-    console = Console(file=sink, force_terminal=True)
+    Console(file=sink, force_terminal=True)
     monkeypatch.setattr("sys.stdout.isatty", lambda: True)
     monkeypatch.setattr("sys.stdout", sink, raising=False)
     # monkeypatch sys.stdout.write/flush

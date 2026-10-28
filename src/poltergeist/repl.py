@@ -65,6 +65,8 @@ class HauntedRepl:
         self.stdin_is_tty = sys.stdin.isatty()
         self.caps = detect_caps(self.console)
         self.theme = get_theme(config.theme)
+        self.palette = None
+        self._ctrl_handler = None
 
     # -- speech ------------------------------------------------------------
     def say(self, text: str, *, style: str | None = None, idle: bool = False) -> None:
@@ -97,6 +99,49 @@ class HauntedRepl:
         # haunted palette — different every session.
         if self.caps.tty:
             self.palette = possess(rng=self._rng)
+        # Ensure the terminal is restored on ANY exit path: Ctrl+C, Ctrl+D,
+        # SIGTERM, window close, or an unhandled exception. Without this the
+        # haunted background color would linger after `haunt` is killed.
+        import atexit
+        import signal
+
+        def _restore_now(*_args) -> None:
+            try:
+                exorcise_terminal()
+            except Exception:  # noqa: BLE001
+                pass
+
+        atexit.register(_restore_now)
+        if hasattr(signal, "SIGTERM"):
+            try:
+                signal.signal(signal.SIGTERM, lambda *_: (_restore_now(), sys.exit(0)))
+            except (OSError, ValueError):
+                pass  # not in main thread or not allowed
+        if hasattr(signal, "SIGINT") and not self.stdin_is_tty:
+            try:
+                signal.signal(signal.SIGINT, lambda *_: (_restore_now(), sys.exit(130)))
+            except (OSError, ValueError):
+                pass
+        # Windows console control handler (CTRL_CLOSE_EVENT, CTRL_LOGOFF_EVENT,
+        # CTRL_SHUTDOWN_EVENT) — fires when the window is closed.
+        if sys.platform == "win32":
+            try:
+                import ctypes
+
+                kernel32 = ctypes.windll.kernel32
+                HandlerRoutine = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_ulong)
+
+                def _console_ctrl(ctrl_type: int) -> bool:
+                    # 0=CTRL_C, 1=CTRL_BREAK, 2=CTRL_CLOSE, 5=CTRL_LOGOFF, 6=CTRL_SHUTDOWN
+                    if ctrl_type in (0, 1, 2, 5, 6):
+                        _restore_now()
+                        return True
+                    return False
+
+                self._ctrl_handler = HandlerRoutine(_console_ctrl)
+                kernel32.SetConsoleCtrlHandler(self._ctrl_handler, True)
+            except Exception:  # noqa: BLE001
+                self._ctrl_handler = None
         if self.config.intro and self.caps.tty:
             play_intro(self.console, self.theme, caps=self.caps, seed=self._rng.random())
         if not self.ghost.try_wake():
