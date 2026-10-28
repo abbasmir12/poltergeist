@@ -31,6 +31,7 @@ from .ui.capabilities import detect as detect_caps
 from .ui.sequences import intro as play_intro
 from .ui.sequences import outro as play_outro
 from .ui.speech import corrupt, typewriter
+from .ui.terminal import exorcise_terminal, possess
 from .ui.theme import get_theme
 
 NIGHT_HOURS = range(0, 5)  # whisper window: 00:00–04:59 local
@@ -92,6 +93,10 @@ class HauntedRepl:
 
     # -- prompt / loop -------------------------------------------------------
     def run(self) -> int:
+        # Possess the whole terminal (bg/fg/cursor/title) with a random
+        # haunted palette — different every session.
+        if self.caps.tty:
+            self.palette = possess(rng=self._rng)
         if self.config.intro and self.caps.tty:
             play_intro(self.console, self.theme, caps=self.caps, seed=self._rng.random())
         if not self.ghost.try_wake():
@@ -318,6 +323,7 @@ class HauntedRepl:
     def _exorcise(self) -> int:
         self.say(self.ghost.whisper("exorcise"))
         play_outro(self.console, self.theme, caps=self.caps, seed=self._rng.random())
+        exorcise_terminal()
         return 0
 
     def _help(self) -> None:
@@ -340,8 +346,12 @@ class HauntedRepl:
 def _restore_terminal() -> None:
     """Best-effort ANSI cleanup so nothing leaves the TTY possessed."""
     try:
+        exorcise_terminal()
+    except Exception:  # noqa: BLE001
+        pass
+    try:
         if sys.stdout.isatty():
-            sys.stdout.write("\x1b[?25h\x1b[0m")  # cursor visible, default SGR
+            sys.stdout.write("\x1b[?25h\x1b[0m")
             sys.stdout.flush()
     except Exception:  # noqa: BLE001 — restoration itself must never fail loudly
         pass

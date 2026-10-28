@@ -1,4 +1,4 @@
-"""Poltergeist UI: themes, animations, meters (phase 2 lights them fully)."""
+"""Poltergeist UI: themes, animations, meters, terminal possession."""
 
 from .sanity import Sanity
 
