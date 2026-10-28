@@ -13,8 +13,8 @@ Ghost brain (core paths wired, polish remaining).**
 
 ## Last updated
 
-2026-10-28 (session 3), by GLM agent — Windows bugs #1 and #2 fixed and pushed
-(`5fc4835`); awaiting user's Windows re-verification.
+2026-10-28 (session 4), by GLM agent — Ollama error surfacing fix pushed
+(`f13833e`); awaiting user's Windows test to see the actual Ollama error.
 
 ## Completed tasks
 
