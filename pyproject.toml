@@ -33,7 +33,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/example/poltergeist" # TODO: set the public URL
+Homepage = "https://github.com/abbasmir12/poltergeist"
+Issues = "https://github.com/abbasmir12/poltergeist/issues"
 
 [project.scripts]
 haunt = "poltergeist.cli:main"

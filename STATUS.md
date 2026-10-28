@@ -13,7 +13,8 @@ Ghost brain (core paths wired, polish remaining).**
 
 ## Last updated
 
-2026-10-28 (session 2), by GLM agent — default model switched to `gemma4:e4b`.
+2026-10-28 (session 2), by GLM agent — default model `gemma4:e4b`; repo pushed
+to https://github.com/abbasmir12/poltergeist.
 
 ## Completed tasks
 

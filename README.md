@@ -46,7 +46,7 @@ $ exorcise                            # return your terminal to the living
    ```console
    $ pipx install poltergeist       # recommended
    # or, from source:
-   $ git clone <this repo> && pip install --user ./poltergeist
+   $ git clone https://github.com/abbasmir12/poltergeist && pip install --user ./poltergeist
    ```
 
 4. **Start the haunting**:
