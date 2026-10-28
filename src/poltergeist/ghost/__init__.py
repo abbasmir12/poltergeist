@@ -55,9 +55,9 @@ class Ghost:
                 yield piece
             if not got_any:
                 yield pick(fallback_event, self.theme, seed=seed, format_kwargs=format_kwargs)
-        except Exception:  # noqa: BLE001 — ProviderUnavailable and midstream faults: replay a canned line
+        except Exception as exc:  # noqa: BLE001 — ProviderUnavailable and midstream faults
             self.model = None
-            yield pick(fallback_event, self.theme, seed=seed, format_kwargs=format_kwargs)
+            yield f"(The séance broke mid-ritual: {exc})"
 
     def react(
         self,

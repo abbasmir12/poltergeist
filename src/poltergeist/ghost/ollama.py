@@ -68,33 +68,45 @@ class OllamaProvider(GhostProvider):
             "model": model,
             "messages": messages_to_dicts(messages),
             "stream": True,
-            "options": {"num_predict": 160, "temperature": 0.9},
+            "options": {"num_predict": 1024, "temperature": 0.9},
         }
         try:
-            req = self._client.build_request("POST", "/api/chat", json=payload, timeout=60.0)
-            response = self._client.send(req, stream=True)
-        except Exception as exc:  # noqa: BLE001 — httpx transport errors
+            with self._client.stream("POST", "/api/chat", json=payload, timeout=120.0) as response:
+                if response.status_code != 200:
+                    body = response.read().decode("utf-8", errors="replace")[:500]
+                    raise ProviderUnavailable(f"ollama status {response.status_code}: {body}")
+                got_content = False
+                for chunk in response.iter_lines():
+                    if not chunk:
+                        continue
+                    try:
+                        data = json.loads(chunk)
+                    except json.JSONDecodeError:
+                        continue
+                    # Mid-stream errors arrive as {"error": "..."} lines under a 200
+                    if "error" in data:
+                        raise ProviderUnavailable(f"ollama error: {data['error']}")
+                    msg = data.get("message") or {}
+                    # gemma4 is a thinking model: reasoning goes in `thinking`,
+                    # the final answer in `content`. Read both so we never lose output.
+                    piece = msg.get("content", "") or ""
+                    if piece:
+                        got_content = True
+                        yield piece
+                    if data.get("done"):
+                        # If we got thinking but no content, the token budget was
+                        # consumed by reasoning — surface that instead of silence.
+                        if not got_content:
+                            thinking = msg.get("thinking", "")
+                            if thinking:
+                                yield f"[thinking consumed all tokens: {thinking[:120]}…]"
+                        break
+        except ProviderUnavailable:
+            raise
+        except httpx.ConnectError as exc:
             raise ProviderUnavailable(f"ollama unreachable: {exc}") from exc
-        if response.status_code != 200:
-            response.close()
-            raise ProviderUnavailable(f"ollama status {response.status_code}")
-        try:
-            for chunk in response.iter_lines():
-                if not chunk:
-                    continue
-                try:
-                    data = json.loads(chunk)
-                except json.JSONDecodeError:
-                    continue
-                piece = (data.get("message") or {}).get("content", "")
-                if piece:
-                    yield piece
-                if data.get("done"):
-                    break
         except Exception as exc:  # noqa: BLE001
             raise ProviderUnavailable(f"stream broken: {exc}") from exc
-        finally:
-            response.close()
 
     def close(self) -> None:
         self._client.close()
