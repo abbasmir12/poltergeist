@@ -13,8 +13,8 @@ Ghost brain (core paths wired, polish remaining).**
 
 ## Last updated
 
-2026-10-28 (session 5), by GLM agent — terminal possession (random haunted
-bg/fg/cursor/title via OSC) pushed (`18b4873`); awaiting Windows Terminal test.
+2026-10-28 (session 6), by GLM agent — terminal restore on all exit paths
+(Ctrl+C, SIGTERM, window close) pushed (`cef329f`); awaiting Windows test.
 
 ## Completed tasks
 
