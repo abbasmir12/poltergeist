@@ -12,7 +12,6 @@ import datetime as _dt
 import pathlib
 import random
 import sys
-from time import sleep
 
 import rich.box
 import rich.panel
@@ -26,6 +25,11 @@ from .safety import AuditLog, classify
 from .safety.redact import redact_output
 from .shell import Shell
 from .ui import Sanity
+from .ui.capabilities import detect as detect_caps
+from .ui.sequences import intro as play_intro
+from .ui.sequences import outro as play_outro
+from .ui.speech import corrupt, typewriter
+from .ui.theme import get_theme
 
 NIGHT_HOURS = range(0, 5)  # whisper window: 00:00–04:59 local
 
@@ -56,10 +60,28 @@ class HauntedRepl:
         self.recent_failures = 0
         self._rng = random.Random(seed)
         self.stdin_is_tty = sys.stdin.isatty()
+        self.caps = detect_caps(self.console)
+        self.theme = get_theme(config.theme)
 
     # -- speech ------------------------------------------------------------
-    def say(self, text: str, *, style: str = "italic pale_turquoise4") -> None:
-        self.console.print(f"🜸 {text}", style=style)
+    def say(self, text: str, *, style: str | None = None, idle: bool = False) -> None:
+        """Ghost speech: typewriter + corruption (all effects degrade safely)."""
+        style = style or f"italic {self.theme.ghost}"
+        glitch_level = 2 if self.sanity.value < 30 else (1 if self.sanity.value < 60 else 0)
+        spoken = corrupt(
+            text,
+            level=glitch_level,
+            sanity=self.sanity.value,
+            rng=self._rng,
+            unicode=self.caps.unicode,
+        )
+        if self.caps.tty and sys.stdout.isatty():
+            try:
+                typewriter(self.console, f"🜸 {spoken}", style=style)
+                return
+            except KeyboardInterrupt:
+                return
+        self.console.print(f"🜸 {spoken}", style=style)
 
     def say_stream(self, chunks) -> None:
         self.console.print("🜸 ", style="italic pale_turquoise4", end="")
@@ -68,15 +90,23 @@ class HauntedRepl:
 
     # -- prompt / loop -------------------------------------------------------
     def run(self) -> int:
+        if self.config.intro and self.caps.tty:
+            play_intro(self.console, self.theme, caps=self.caps, seed=self._rng.random())
         if not self.ghost.try_wake():
             self.console.print(
                 rich.panel.Panel(
                     "[italic]No local model answered the summoning — the ghost speaks in its "
                     "canned voice for now. Install Ollama, then `ollama pull gemma3:1b`, and run "
                     "`haunt doctor` to diagnose. Nothing leaves this machine either way.[/italic]",
-                    border_style="dark_orange3",
+                    border_style=self.theme.panel_border,
                     box=rich.box.ROUNDED,
                 )
+            )
+        else:
+            self.console.print(
+                f"[dim italic {self.theme.whisper}]🜸 bound to local model "
+                f"[bold]{self.ghost.model}[/bold] — everything stays on this machine[/dim italic "
+                f"{self.theme.whisper}]"
             )
         self.say(self.ghost.whisper("greet", seed=self._rng.random()))
         try:
@@ -121,12 +151,21 @@ class HauntedRepl:
         return input(self._make_plain_prompt())
 
     def _make_plain_prompt(self) -> str:
-        return f"{self._cwd_display()} › "
+        """Non-tty fallback prompt: no ANSI, ASCII-safe glyph."""
+        glyph = self.theme.glyph_prompt_ascii
+        return f"{glyph} {self._cwd_display()} › "
 
     def _prompt_text(self) -> str:
         cwd = self._cwd_display()
-        glyph = "👻" if self.config.flicker else "*"
-        return f" {glyph}  [italic dim]{cwd}[/italic dim] › "
+        glyph = (
+            self.theme.glyph_prompt
+            if self.caps.unicode and self.config.flicker
+            else self.theme.glyph_prompt_ascii
+        )
+        return (
+            f" {glyph} "
+            f"[italic dim {self.theme.prompt_dir}]{cwd}[/italic dim {self.theme.prompt_dir}] › "
+        )
 
     def _cwd_display(self) -> str:
         cwd = self.shell.cwd
@@ -146,7 +185,16 @@ class HauntedRepl:
 
         result = self.shell.run(text, on_output=stream)
         self.history.append((text, result.exit_code))
+        level_before = self.sanity.level
         self.sanity.on_command(exit_code=result.exit_code)
+        if self.stdin_is_tty and result.exit_code != 0:
+            fail = self.theme.fail
+            self.console.print(
+                f"[{fail}]☠ exit {result.exit_code}[/]"
+                f"[dim {fail}] — {self.sanity.bar()} ({self.sanity.level})[/dim {fail}]"
+            )
+        elif self.stdin_is_tty and result.exit_code == 0 and level_before != self.sanity.level:
+            pass  # meter drifts silently upward; the ghost may comment below
 
         if verdict.blocked:
             self.say(
@@ -223,20 +271,26 @@ class HauntedRepl:
 
     # -- misc commands ---------------------------------------------------------
     def _print_sanity(self) -> None:
-        self.console.print(f"[bold]sanity[/bold]  {self.sanity.bar()}  — {self.sanity.level}")
+        color = self.theme.sanity_bar[0] if self.sanity.value > 40 else self.theme.fail
+        whisper = self.theme.whisper
+        self.console.print(
+            f"[bold]sanity[/bold]  [{color}]{self.sanity.bar()}[/{color}] — {self.sanity.level}"
+            f"  [dim {whisper}]failures curdle it; clean exits heal it[/dim {whisper}]"
+        )
 
     def _set_theme(self, name: str) -> None:
         if name.lower() not in ("classic", "ofrenda", "slasher"):
             self.say("Themes: classic · ofrenda · slasher. Reality offers only these.", style="dim")
             return
         self.config.theme = name.lower()
+        self.theme = get_theme(name.lower())
         self.ghost.theme = name.lower()
         save_config(self.config)
         self.say(f"The room rearranges itself into a {name.lower()} vision.")
 
     def _exorcise(self) -> int:
         self.say(self.ghost.whisper("exorcise"))
-        sleep(0.25)
+        play_outro(self.console, self.theme, caps=self.caps, seed=self._rng.random())
         return 0
 
     def _help(self) -> None:
