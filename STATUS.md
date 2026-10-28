@@ -13,8 +13,8 @@ Ghost brain (core paths wired, polish remaining).**
 
 ## Last updated
 
-2026-10-28 (session 4), by GLM agent — Ollama error surfacing fix pushed
-(`f13833e`); awaiting user's Windows test to see the actual Ollama error.
+2026-10-28 (session 5), by GLM agent — terminal possession (random haunted
+bg/fg/cursor/title via OSC) pushed (`18b4873`); awaiting Windows Terminal test.
 
 ## Completed tasks
 
