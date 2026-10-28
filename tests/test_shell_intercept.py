@@ -43,8 +43,9 @@ def test_cd_windows_flags():
 
 def test_resolve_cd_relative():
     op = ic.BuiltinOp(kind="cd", target="sub")
-    out = ic.resolve_cd_target(op, ic.Path("/tmp"), None)
-    assert str(out) == str(ic.Path("/tmp") / "sub")
+    out = ic.resolve_cd_target(op, ic.Path.home() / "tmp", None)
+    expected = (ic.Path.home() / "tmp" / "sub").resolve()
+    assert ic.Path(out) == expected
 
 
 def test_resolve_cd_tilde():

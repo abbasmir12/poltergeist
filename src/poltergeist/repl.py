@@ -58,7 +58,7 @@ class HauntedRepl:
         self.sanity = Sanity()
         self.audit = AuditLog(Config.audit_path())
         self.history: list[tuple[str, int]] = []
-        self.session = PromptSession(history=InMemoryHistory())
+        self.session = None  # created lazily in _read_input (prompt_toolkit needs a real console)
         self.recent_failures = 0
         self._rng = random.Random(seed)
         self.stdin_is_tty = sys.stdin.isatty()
@@ -151,6 +151,8 @@ class HauntedRepl:
     def _read_input(self) -> str:
         """prompt_toolkit when it is real terminal; plain input() otherwise."""
         if self.stdin_is_tty:
+            if self.session is None:
+                self.session = PromptSession(history=InMemoryHistory())
             return self.session.prompt(self._prompt_text())
         return input(self._make_plain_prompt())
 
